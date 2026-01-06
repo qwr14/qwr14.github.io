@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расширенный поиск отзывов о банках | Банки.ру</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Шапка в стиле Banki.ru */
+        .header {
+            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span {
+            color: #60a5fa;
+        }
+        
+        /* Панель поиска */
+        .search-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .search-title {
+            font-size: 22px;
+            color: #1e40af;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        select, input {
+            padding: 12px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .results-count {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Основная область с результатами и графиками */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
+        }
+        
+        /* Список отзывов */
+        .reviews-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #1e40af;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .review-item {
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .review-item:hover {
+            border-color: #93c5fd;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .bank-name {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 16px;
+        }
+        
+        .review-service {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .review-text {
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .sentiment {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .sentiment-positive {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .sentiment-negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .sentiment-neutral {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .review-date {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        /* Боковая панель с аналитикой */
+        .analytics-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 15px 0;
+        }
+        
+        .bar {
+            flex: 1;
+            background: #3b82f6;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .bar:hover {
+            opacity: 0.9;
+            transform: translateY(-5px);
+        }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .topics-list {
+            list-style: none;
+        }
+        
+        .topic-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .topic-name {
+            color: #374151;
+        }
+        
+        .topic-count {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .page-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#60a5fa"/>
+                    <path d="M2 17L12 22L22 17" stroke="#60a5fa" stroke-width="2"/>
+                    <path d="M2 12L12 17L22 12" stroke="#60a5fa" stroke-width="2"/>
+                </svg>
+                Банки<span>.ру</span>
+                <span style="font-size: 16px; margin-left: 15px; color: #93c5fd; font-weight: normal;">Аналитика отзывов</span>
+            </div>
+            <div style="color: #93c5fd; font-size: 14px;">Агрегатор отзывов о банковских услугах</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="search-section">
+            <div class="search-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="#3b82f6" stroke-width="2"/>
+                </svg>
+                Расширенный поиск отзывов
+            </div>
+            
+            <div class="search-filters">
+                <div class="filter-group">
+                    <label class="filter-label">Банк</label>
+                    <select id="bankSelect">
+                        <option value="">Все банки</option>
+                        <option value="sber" selected>Сбербанк</option>
+                        <option value="tinkoff">Тинькофф</option>
+                        <option value="vtb">ВТБ</option>
+                        <option value="alfa">Альфа-Банк</option>
+                        <option value="gazprom">Газпромбанк</option>
+                        <option value="raiff">Райффайзенбанк</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Услуга</label>
+                    <select id="serviceSelect">
+                        <option value="">Все услуги</option>
+                        <option value="credit">Кредит наличными</option>
+                        <option value="mortgage" selected>Ипотека</option>
+                        <option value="debit">Дебетовая карта</option>
+                        <option value="credit-card">Кредитная карта</option>
+                        <option value="deposit">Вклад</option>
+                        <option value="mobile">Мобильный банк</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Тональность отзыва</label>
+                    <select id="sentimentSelect">
+                        <option value="">Любая тональность</option>
+                        <option value="positive">Положительные</option>
+                        <option value="negative">Отрицательные</option>
+                        <option value="neutral">Нейтральные</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Период</label>
+                    <div class="date-range">
+                        <input type="date" id="dateFrom" value="2024-01-01">
+                        <span>—</span>
+                        <input type="date" id="dateTo" value="2024-05-31">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Тематика</label>
+                    <select id="topicSelect">
+                        <option value="">Все темы</option>
+                        <option value="service">Обслуживание</option>
+                        <option value="rates">Тарифы и комиссии</option>
+                        <option value="app">Мобильное приложение</option>
+                        <option value="documents">Документы</option>
+                        <option value="support">Техподдержка</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Слова в отзыве</label>
+                    <input type="text" id="keywordInput" placeholder="Например: комиссия, одобрили, отказали">
+                </div>
+            </div>
+            
+            <div class="search-actions">
+                <div class="results-count">Найдено: <strong>1,247 отзывов</strong></div>
+                <div>
+                    <button class="btn btn-secondary" id="resetBtn">Сбросить</button>
+                    <button class="btn btn-primary" id="searchBtn">Найти отзывы</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="reviews-section">
+                <h3 class="section-title">Результаты поиска (показано 10 из 1247)</h3>
+                
+                <!-- Пример отзыва 1 -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="bank-name">Сбербанк</div>
+                        <div class="review-service">Ипотека</div>
+                    </div>
+                    <div class="review-text">
+                        Оформлял ипотеку на вторичное жилье. Менеджер была очень внимательна, все объяснила. Процентная ставка 8.5%, одобрили сумму чуть больше запрашиваемой. Единственное - сбор документов занял почти 3 недели.
+                    </div>
+                    <div class="review-footer">
+                        <span class="sentiment sentiment-positive">Положительный</span>
+                        <span class="review-date">15 мая 2024 • Алексей В., Москва</span>
+                    </div>
+                </div>
+                
+                <!-- Пример отзыва 2 -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="bank-name">Сбербанк</div>
+                        <div class="review-service">Ипотека</div>
+                    </div>
+                    <div class="review-text">
+                        Ужасный опыт! Обещали одобрить ипотеку за 5 дней, в итоге тянули 3 недели и отказали без внятного объяснения. Потеряли время, сорвалась сделка с продавцом. Менеджер не перезванивал, приходилось самому постоянно звонить.
+                    </div>
+                    <div class="review-footer">
+                        <span class="sentiment sentiment-negative">Отрицательный</span>
+                        <span class="review-date">10 мая 2024 • Мария К., Санкт-Петербург</span>
+                    </div>
+                </div>
+                
+                <!-- Пример отзыва 3 -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="bank-name">Сбербанк</div>
+                        <div class="review-service">Мобильный банк</div>
+                    </div>
+                    <div class="review-text">
+                        Приложение Сбербанк Онлайн работает стабильно, но после последнего обновления стало подвисать на iPhone. Функционал полный, все операции доступны. Удобно, что можно подать заявку на ипотеку прямо из приложения.
+                    </div>
+                    <div class="review-footer">
+                        <span class="sentiment sentiment-neutral">Нейтральный</span>
+                        <span class="review-date">8 мая 2024 • Дмитрий С., Екатеринбург</span>
+                    </div>
+                </div>
+                
+                <!-- Пример отзыва 4 -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="bank-name">Сбербанк</div>
+                        <div class="review-service">Ипотека</div>
+                    </div>
+                    <div class="review-text">
+                        Рефинансировал ипотеку из другого банка в Сбербанк. Снизили ставку с 11% до 8.7%. Процесс занял около месяца, бумажной волокиты много, но результат того стоит. Экономия около 7 тысяч в месяц.
+                    </div>
+                    <div class="review-footer">
+                        <span class="sentiment sentiment-positive">Положительный</span>
+                        <span class="review-date">5 мая 2024 • Андрей П., Новосибирск</span>
+                    </div>
+                </div>
+                
+                <!-- Пример отзыва 5 -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="bank-name">Сбербанк</div>
+                        <div class="review-service">Кредитная карта</div>
+                    </div>
+                    <div class="review-text">
+                        Оформил кредитную карту с льготным периодом 100 дней. Пришло быстро, курьерская доставка. Но комиссия за снятие наличных 3.9% - это много. Лимит одобрили 300 000, хотя запрашивал 500 000.
+                    </div>
+                    <div class="review-footer">
+                        <span class="sentiment sentiment-neutral">Нейтральный</span>
+                        <span class="review-date">2 мая 2024 • Ольга М., Казань</span>
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <span>...</span>
+                    <button class="page-btn">125</button>
+                </div>
+            </div>
+            
+            <div class="analytics-sidebar">
+                <!-- График распределения тональности -->
+                <div class="chart-container">
+                    <h4 class="chart-title">Распределение по тональности</h4>
+                    <div class="chart">
+                        <div class="bar" style="height: 80%; background: #10b981;">
+                            <div class="bar-value">42%</div>
+                            <div class="bar-label">Положит.</div>
+                        </div>
+                        <div class="bar" style="height: 65%; background: #ef4444;">
+                            <div class="bar-value">34%</div>
+                            <div class="bar-label">Отрицат.</div>
+                        </div>
+                        <div class="bar" style="height: 45%; background: #6b7280;">
+                            <div class="bar-value">24%</div>
+                            <div class="bar-label">Нейтральн.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">524</div>
+                            <div class="stat-label">Положительных</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">424</div>
+                            <div class="stat-label">Отрицательных</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Динамика отзывов по месяцам -->
+                <div class="chart-container">
+                    <h4 class="chart-title">Динамика отзывов по месяцам</h4>
+                    <div class="chart">
+                        <div class="bar" style="height: 40%;">
+                            <div class="bar-value">89</div>
+                            <div class="bar-label">Янв</div>
+                        </div>
+                        <div class="bar" style="height: 55%;">
+                            <div class="bar-value">124</div>
+                            <div class="bar-label">Фев</div>
+                        </div>
+                        <div class="bar" style="height: 70%;">
+                            <div class="bar-value">158</div>
+                            <div class="bar-label">Мар</div>
+                        </div>
+                        <div class="bar" style="height: 85%;">
+                            <div class="bar-value">192</div>
+                            <div class="bar-label">Апр</div>
+                        </div>
+                        <div class="bar" style="height: 100%;">
+                            <div class="bar-value">247</div>
+                            <div class="bar-label">Май</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Топ тем отзывов -->
+                <div class="chart-container">
+                    <h4 class="chart-title">Частые темы в отзывах</h4>
+                    <ul class="topics-list">
+                        <li class="topic-item">
+                            <span class="topic-name">Одобрение / отказ</span>
+                            <span class="topic-count">287</span>
+                        </li>
+                        <li class="topic-item">
+                            <span class="topic-name">Скорость рассмотрения</span>
+                            <span class="topic-count">234</span>
+                        </li>
+                        <li class="topic-item">
+                            <span class="topic-name">Процентная ставка</span>
+                            <span class="topic-count">198</span>
+                        </li>
+                        <li class="topic-item">
+                            <span class="topic-name">Работа менеджера</span>
+                            <span class="topic-count">176</span>
+                        </li>
+                        <li class="topic-item">
+                            <span class="topic-name">Документы</span>
+                            <span class="topic-count">152</span>
+                        </li>
+                        <li class="topic-item">
+                            <span class="topic-name">Комиссии</span>
+                            <span class="topic-count">128</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Сравнение банков -->
+                <div class="chart-container">
+                    <h4 class="chart-title">Сравнение банков по отзывам</h4>
+                    <div class="chart">
+                        <div class="bar" style="height: 100%;">
+                            <div class="bar-value">4.2</div>
+                            <div class="bar-label">Сбербанк</div>
+                        </div>
+                        <div class="bar" style="height: 90%; background: #8b5cf6;">
+                            <div class="bar-value">4.5</div>
+                            <div class="bar-label">Тинькофф</div>
+                        </div>
+                        <div class="bar" style="height: 75%; background: #10b981;">
+                            <div class="bar-value">4.1</div>
+                            <div class="bar-label">ВТБ</div>
+                        </div>
+                        <div class="bar" style="height: 80%; background: #f59e0b;">
+                            <div class="bar-value">4.3</div>
+                            <div class="bar-label">Альфа-Банк</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 10px; text-align: center;">
+                        Средняя оценка (из 5) за последние 3 месяца
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 2024 Банки.ру — Аналитика отзывов о банковских услугах. Все данные получены из открытых источников.
+        </div>
+    </div>
+
+    <script>
+        // Имитация работы поиска
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const bank = document.getElementById('bankSelect').value;
+            const service = document.getElementById('serviceSelect').value;
+            const sentiment = document.getElementById('sentimentSelect').value;
+            
+            let message = 'Выполняется поиск с параметрами: ';
+            if (bank) message += `Банк: ${document.getElementById('bankSelect').options[document.getElementById('bankSelect').selectedIndex].text}, `;
+            if (service) message += `Услуга: ${document.getElementById('serviceSelect').options[document.getElementById('serviceSelect').selectedIndex].text}, `;
+            if (sentiment) message += `Тональность: ${document.getElementById('sentimentSelect').options[document.getElementById('sentimentSelect').selectedIndex].text}`;
+            
+            alert(message + '\n\n(В реальном приложении здесь был бы запрос к API и обновление результатов)');
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('bankSelect').selectedIndex = 0;
+            document.getElementById('serviceSelect').selectedIndex = 0;
+            document.getElementById('sentimentSelect').selectedIndex = 0;
+            document.getElementById('topicSelect').selectedIndex = 0;
+            document.getElementById('keywordInput').value = '';
+            document.getElementById('dateFrom').value = '2024-01-01';
+            document.getElementById('dateTo').value = '2024-05-31';
+        });
+        
+        // Анимация графиков при наведении
+        const bars = document.querySelectorAll('.bar');
+        bars.forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            bar.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
